@@ -1,0 +1,77 @@
+#app{
+	display: flex;
+	flex-direction: column;
+}
+
+#header{
+	height: 10vh;
+	background-color: #92B2E8;
+	text-align: center;
+	padding-top: 2vh;
+}
+
+#header h2{
+	color: #2B4699;
+}
+
+#container{
+	display: flex;
+	height: 76vh;
+	    -webkit-flex: 1 1 auto;
+    overflow-y: auto;
+	justify-content: center;
+
+	margin-top: 2vh;
+	margin-bottom: 2vh;
+}
+
+
+#footer{
+	height: 10vh;
+	background-color: #92B2E8;
+}
+
+
+.flex-footer{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#footer .button{
+	height: 6vh;
+	margin-top: 2vh;
+	width: 20vw;
+}
+
+#footer .retour{
+	margin-left: 2vw;
+}
+
+#footer .play{
+	margin-right: 2vw;
+}
+
+
+#pyramide-game{
+	width: 90%;
+	display: flex;
+	flex-direction: column;
+	margin-left: 5%;
+
+}
+
+#pyramide-game .tour-button{
+	width: 75%;
+	margin: auto;
+}
+
+#pyramide-game .tour-button Button{
+	width: 100%;
+}
+
+
+
+.max-height{
+	height: 100%; 
+}

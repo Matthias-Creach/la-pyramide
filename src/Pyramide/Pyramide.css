@@ -1,0 +1,106 @@
+.flex-row{
+	display: flex;
+	flex-direction: row;
+	height: 100vh;
+}
+
+.panel-left{
+	width: 70vw;
+	border-right: 1px blue solid;
+}
+
+
+
+#pyramide tr{
+}
+
+.left{
+	text-align: left;
+}
+
+.center{
+	text-align: center;
+}
+
+.card{
+	width: 75px;
+	margin: auto;
+}
+
+.min-card{
+	width: 90%;
+	margin: 5px;
+	padding: 5px;
+
+}
+
+.player-name{
+	vertical-align: middle !important;
+	width: 10vw;
+	font-size: 25px;
+	font-weight: bold;
+}
+
+/* Panel Right */
+
+.panel-right{
+	display: flex;
+	width: 30vw;
+	height: 100vh;
+
+	justify-content: space-between;
+	border-left: 1px blue solid;
+	flex-direction: column;
+}
+
+.panel-right-header{
+	display: flex;
+	height: 10vh;
+	align-items: center;
+	text-align: center;
+	padding: 5px;
+	border-bottom: 2px blue solid;
+	justify-content: center;
+}
+
+
+.panel-right-center{
+	height: 60vh;
+	display: flex;
+	flex-direction:row;
+	justify-content: center;
+}
+
+.content{
+	height: 90%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.content .button-choice{
+	height: 10vh;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.panel-right-footer{
+	height: 30vh;
+	text-align: center;
+	padding: 5px;
+
+	border-top: 2px blue solid;
+	overflow: auto;
+	
+}
+
+/* Utils */
+
+.active{
+	background-color: #CFEDCE;
+}
+
+.back-green{
+	background-color: #CFEDCE;
+}
+

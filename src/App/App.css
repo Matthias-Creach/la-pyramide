@@ -1,9 +1,18 @@
 .App {
+  display: grid;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  height: 50vh;
+  margin-top: 5vh
 }
 
-.App-logo {
-  height: 40vmin;
+.App .ButtonGroup{
+  width: 70%;
+}
+
+.App .Button{
+  height: 75px;
 }
 
 .App-header {
