@@ -4,16 +4,17 @@ import './ChoixJoueur.css'
 
 import { Button, ButtonGroup, Form, FormControl, InputGroup  } from 'react-bootstrap';
 
-function JoueurInput(props){
+function JoueurInput(props){ 
 	return(
 		<div>
 			  <InputGroup className="mb-3" size="lg">
 			    <FormControl
-			      value={props.name}
-			      aria-describedby="basic-addon2"
+			    	value={props.name}
+			      	aria-describedby="basic-addon2"
+			      	placeholder="Search..."
 			    />
 			    <InputGroup.Append>
-			      <Button onClick={props.onClick} variant="outline-secondary"> - </Button>
+			      <Button onClick={props.remove} variant="outline-secondary"> - </Button>
 			    </InputGroup.Append>
 			  </InputGroup>
 		</div>
@@ -26,19 +27,8 @@ class ChoixJoueur extends React.Component{
 		super(props);
 		this.state = {
 			joueurs: props.joueurs,
+			idCardCompteur: 0,
 		}
-	}
-
-	addJoueur = () => {
-		let oldJoueur = this.state.joueurs;
-		let newJoueur = oldJoueur;
-		newJoueur.push({"name": "", "main": Array(4).fill({"value": "", "symbol": "", "name": "blue_back"})});
-
-		this.setState({
-			joueurs: newJoueur,
-		})
-
-		console.log(this.state.joueurs)
 	}
 
 	componentDidMount(){
@@ -46,37 +36,39 @@ class ChoixJoueur extends React.Component{
 		this.addJoueur();
 	}
 
-	onChangeName = (position, event) => {
-		let oldJoueur = this.state.joueurs;
-		let newJoueur = oldJoueur;
+	/** Actions de modifications de la liste des joueurs **/
 
-		newJoueur[position].name = event.target.value;
-
-		this.setState({
-			joueurs: newJoueur,
-		})
+	addJoueur = () => {
+		let joueurs = this.state.joueurs;
+		let main = Array(4);
+		joueurs.push({"name": "", "main": Array(4).fill({"value": "", "symbol": "", "name": "blue_back"})});
+		this.setState({joueurs: joueurs});
 	}
 
-	handleRemoveJoueur(position){
+	removeJoueur(position){
 		if(this.state.joueurs.length > 2){
-			let oldJoueur = this.state.joueurs;
-			let newJoueur = oldJoueur;
-			newJoueur.splice(position, 1);
-
-			this.setState({
-				joueurs: newJoueur,
-			});	
+			let joueurs = this.state.joueurs;
+			joueurs.splice(position, 1);
+			this.setState({joueurs: joueurs});	
 		}
 	}
+
+	onChangeName = (position, event) => {
+		let joueurs = this.state.joueurs;
+		joueurs[position].name = event.target.value;
+		this.setState({joueurs: joueurs});
+	}
+
+	/** Modification de la vue **/
 
 	renderInput(){
 		const inputs = [];
 		for(let position in this.state.joueurs){
 			inputs.push(
-				<div key={position} onChange={(e) => this.onChangeName(position, e)}>
+				<div onChange={(e) => this.onChangeName(position, e)}>
 					<JoueurInput position={position} 
 								 name={this.state.joueurs[position].name}
-								 onClick ={() => this.handleRemoveJoueur(position)}/>
+								 remove ={() => this.removeJoueur(position)}/>
 				</div>
 			)
 		}

@@ -1,8 +1,11 @@
 import React from 'react';
 import './Pyramide.css';
 
-import { Table, ButtonGroup, Button } from 'react-bootstrap'
+import { Table, Button } from 'react-bootstrap'
 
+/**********************
+ *     Constantes     *
+ **********************/
 
 const LABELS = {
 	"1": ["Rouge", "Noire"], 
@@ -21,6 +24,10 @@ const LABELS_PYRAMIDE = {
 
 const BACKGROUND_GREEN = "back-green"
 const MAX_TOUR_PYRAMIDE = 10;
+
+/**********************
+ *     Composants     *
+ **********************/
 
 function Card(props){
 	let card = props.card;
@@ -80,21 +87,7 @@ class Pyramide extends React.Component{
     	this.generateCards();
  	}
 
-	tableRender(){
-		let rows = [];
-		let i = 0;
-		this.state.joueurs.forEach((joueur) => {
-			rows.push(
-				<tr className={joueur.background}>
-					<td className="player-name">{joueur.name}</td>
-					{joueur.main.map((card) => <Card key={joueur.name} card={card}/>)}
-				</tr>
-			)
-		});
-		return rows;
-	}
-
-	resetBackground(){
+ 	resetBackground(){
 		this.state.joueurs.forEach((joueur) => {
 			joueur.main.forEach((card) => {
 				card.background = "";
@@ -102,15 +95,12 @@ class Pyramide extends React.Component{
 		});
 	}
 
-	resetActivePlayer = () => {
-		this.state.joueurs.forEach((joueur) => {
-			joueur.background = ""
-		});
-	}
-	activePlayer(p){
-		this.resetActivePlayer();
-		this.state.joueurs[p].background = "active";	
-	}
+
+ 	/********************************
+ 	 *     Gestion de la partie     *
+ 	 ********************************/
+
+	/* Fonctions associées à la génération du jeu de carte (mélange + création) */
 
     shuffle(array){
     	this.addHistoryMessage("Mélange du paquet de carte...")
@@ -123,6 +113,7 @@ class Pyramide extends React.Component{
 		let symboles = ["C", "D", "H", "S"];
 
 		symboles.forEach((e) => {
+			console.log(e)
 			for(let j = 1 ; j < 14 ; j++){
 				cards.push({
 					"value": j,
@@ -131,145 +122,113 @@ class Pyramide extends React.Component{
 				});
 			}
 		})
-
+		console.log(cards);
 		this.shuffle(cards);
 		this.setState({
 			deck: cards,
 		});
 	}
 
+	/* Fonctions associées à la gestion de l'historique */
+
 	addHistoryMessage(message){
-		this.state.history.unshift(message);
+		let history = this.state.history;
+		history.unshift(message);
+		this.setState({history:history});
 	}
 
-	endTurn(){
+	/*
+		Règles du jeu
+	*/
+	rules(manche, card, joueur, value){
 
-		if(this.state.isManche){
-			let newJoueurEnCours = this.state.joueurEnCours;
-			let newManche        = this.state.manche;
-					this.activePlayer(newJoueurEnCours);
-			if( newJoueurEnCours == this.state.joueurs.length - 1){
-				newJoueurEnCours = 0;
-				newManche++;
-				if(newManche == 5){
-					this.resetActivePlayer()
-				}
-			}else{
-				newJoueurEnCours++;
+		let finDeManche = true;
+
+		/* Définitions des différentes règles selon la manche */
+		if(manche === 1){
+			console.log(value)
+			if((LABELS[manche][value] === LABELS[manche][0] && (card.symbol === "D" || card.symbol === "H")) 
+			|| (LABELS[manche][value] === LABELS[manche][1] && (card.symbol === "S" || card.symbol === "C"))){
+				finDeManche = false;
 			}
 
-			this.setState({
-				joueurEnCours: newJoueurEnCours,
-				manche: newManche,
-			});
-		}
-	}
-
-	handleClickChoixJoueur(id){
-		let fromPlayer = this.state.joueurs[this.state.joueurEnCours].name
-		let toPlayer   = this.state.joueurs[id].name
-
-		this.addHistoryMessage(`${fromPlayer} donne ${this.state.manche} gorgée(s) à ${toPlayer}`);
-
-		this.setState({
-			isManche: true
-		});
-
-		this.endTurn();
-	}
-
-	handleClick(value){
-
-
-		this.resetBackground();
-
-		let playerName = this.state.joueurs[this.state.joueurEnCours].name;
-		let label      = LABELS[this.state.manche][value];
-
-		this.addHistoryMessage(`${playerName} a choisi ${label}`);
-
-		let oldDeck = this.state.deck;
-		let newDeck = oldDeck;
-
-		let card = newDeck.shift();
-
-		let oldJoueurs = this.state.joueurs;
-		let newJoueurs  = oldJoueurs;
-
-		newJoueurs[this.state.joueurEnCours].main[this.state.manche - 1] = card
-
-		let joueurPrecedent  = this.state.joueurEnCours;
-
-		let newJoueurEnCours = this.state.joueurEnCours;
-		let oldJoueurEnCours = this.state.joueurEnCours;
-
-		let newManche = this.state.manche;
-
-
-
-		if(this.state.manche == 1){
-			if((LABELS[this.state.manche][value] == LABELS[this.state.manche][0] && (card.symbol == "D" || value.charAt(0) == "H")) 
-			|| (LABELS[this.state.manche][value] == LABELS[this.state.manche][1] && (card.symbol == "S" || value.charAt(0) == "C"))){
-				this.addHistoryMessage(`${playerName} donne ${this.state.manche} gorgée(s)`);
-				this.setState({isManche: false});
-			}else{
-				this.addHistoryMessage(`${playerName} prend ${this.state.manche} gorgée(s)`);
+		}else if(manche === 2){
+			let firstCard = joueur.main[0];
+			if((LABELS[manche][value] === LABELS[manche][0] && card.value > firstCard.value)
+			|| (LABELS[manche][value] === LABELS[manche][1] && card.value < firstCard.value)){
+				finDeManche = false;
 			}
-		}else if(this.state.manche == 2){
-			let firstCard = newJoueurs[this.state.joueurEnCours].main[0];
-			if((LABELS[this.state.manche][value] == LABELS[this.state.manche][0] &&  card.value > firstCard.value)
-			|| (LABELS[this.state.manche][value] == LABELS[this.state.manche][1] &&  card.value < firstCard.value)){
-				this.addHistoryMessage(`${playerName} donne ${this.state.manche} gorgée(s)`);
-				this.setState({isManche: false});
-			}else{
-				this.addHistoryMessage(`${playerName} prend ${this.state.manche} gorgée(s)`);
-			}
-		}else if(this.state.manche == 3){
+
+		}else if(manche === 3){
+
 			let values = [];
-			values.push(newJoueurs[this.state.joueurEnCours].main[0].value);
-			values.push(newJoueurs[this.state.joueurEnCours].main[1].value);
+			values.push(joueur.main[0].value);
+			values.push(joueur.main[1].value);
 			let min = Math.min(...values);
 			let max = Math.max(...values);
-			if((LABELS[this.state.manche][value] == LABELS[this.state.manche][0] && (min < card.value && card.value < max))
-			|| (LABELS[this.state.manche][value] == LABELS[this.state.manche][1] && (min > card.value || card.value > max))){
-				this.addHistoryMessage(`${playerName} donne ${this.state.manche} gorgée(s)`);
-				this.setState({isManche: false});
-			}else{
-				this.addHistoryMessage(`${playerName} prend ${this.state.manche} gorgée(s)`);
+
+			if((LABELS[manche][value] === LABELS[manche][0] && (min < card.value && card.value < max))
+			|| (LABELS[manche][value] === LABELS[manche][1] && (min > card.value || card.value > max))){
+				finDeManche = false;
 			}
-		}else if(this.state.manche == 4){
-			if(LABELS[this.state.manche][value] == LABELS[this.state.manche][0] && card.symbol == "C"
-			||(LABELS[this.state.manche][value] == LABELS[this.state.manche][1] && card.symbol == "H")
-			||(LABELS[this.state.manche][value] == LABELS[this.state.manche][2] && card.symbol == "S")
-			||(LABELS[this.state.manche][value] == LABELS[this.state.manche][3] && card.symbol == "D")){
-				this.addHistoryMessage(`${playerName} donne ${this.state.manche} gorgée(s)`);
-				this.setState({isManche: false});
-			}else{
-				this.addHistoryMessage(`${playerName} prend ${this.state.manche} gorgée(s)`);
+
+		}else if(manche === 4){
+			if((LABELS[manche][value] === LABELS[manche][0] && card.symbol === "C")
+			|| (LABELS[manche][value] === LABELS[manche][1] && card.symbol === "H")
+			|| (LABELS[manche][value] === LABELS[manche][2] && card.symbol === "S")
+			|| (LABELS[manche][value] === LABELS[manche][3] && card.symbol === "D")){
+				finDeManche = false;
 			}
 		}
 
-		this.endTurn();
+		/* Ajout d'un message dans l'historique selon le résultat du joueur */
+		if(finDeManche){
+			this.addHistoryMessage(`${joueur.name} prend ${manche} gorgée(s)`);
+		}
+
+		/* Mise à jour du statut de la manche */
+		return finDeManche;
+
+	}
+
+
+	/*  Fonction qui s'applique au moment de la fin d'un tour d'un joueur
+			-> Passage au joueur suivant
+			-> Passage à la manche suivante
+	*/
+	endTurn(isManche, manche, joueurEnCours){
+		if(isManche){
+			if( joueurEnCours === this.state.joueurs.length - 1){
+				joueurEnCours = 0;
+				manche++;
+			}else{
+				joueurEnCours++;
+			}
+		}
 
 		this.setState({
-			deck: newDeck,
-			joueurs: newJoueurs,
-		})
+			isManche: isManche,
+			manche: manche, 
+			joueurEnCours: joueurEnCours,
+		});	
 	}
+
+	/**
+		Mise en avant d'une / des cartes des joueurs concernées, avec l'ajout d'un message dans l'historique
+	**/
 
 	activeBackground(value){
 		this.state.joueurs.forEach((joueur) => {
 			joueur.main.forEach((card) =>{
-				if(card.value == value){
+				if(card.value === value){
 					card.background = BACKGROUND_GREEN;
 					let labelAction = "";
-					if(this.state.tourPyramide % 2 == 0){
+					if(this.state.tourPyramide % 2 === 0){
 						labelAction = "prend";
 					}
 					else{
 						labelAction = "donne";
 					}
-
 					this.addHistoryMessage(`${joueur.name} ${labelAction} ${LABELS_PYRAMIDE[this.state.compteurVerre]}`);
 					
 				}else{
@@ -279,39 +238,116 @@ class Pyramide extends React.Component{
 		});
 	}
 
-	handleClickPyramide(){
+	/*******************************
+	 *     Actions utilisateur     *
+	 *******************************/
 
-		let position = this.state.tourPyramide;
-		let oldDeck = this.state.deck;
-		let newDeck = oldDeck;
+	handleClickChoixJoueur(id, joueurs, manche, joueurEnCours){
 
-		let card = newDeck.shift();
+		console.log('Joueur en cours: ' +  joueurEnCours);
+		let fromPlayer = joueurs[joueurEnCours].name
+		let toPlayer   = joueurs[id].name
 
-		
-		this.activeBackground(card.value);
-		this.state.compteurVerre += ((position + 1) % 2 == 0 ? 1 : 0);
+		console.log("handleClickJoueur")
+		this.addHistoryMessage(`${fromPlayer} donne ${manche} gorgée(s) à ${toPlayer}`);
+	
+		this.endTurn(true, manche, joueurEnCours);
+	}
 
-		let oldPyramide = this.state.pyramide;
-		let newPyramide = oldPyramide;
+	handleClick(value, manche, joueurEnCours){
 
-		newPyramide[position] = card
+		this.resetBackground();
 
-		position++;
+		let joueurs = this.state.joueurs;
+		let deck = this.state.deck;
 
-		if(MAX_TOUR_PYRAMIDE == position){
-			this.setState({
-				isEnd: true,
-			});
-		}
+		let joueur  = joueurs[joueurEnCours];
+		let label   = LABELS[manche][value];
+
+		this.addHistoryMessage(`${joueur.name} a choisi ${label}`);
+
+		let card = deck.shift();
+
+		joueur.main[this.state.manche - 1] = card
+
+		let isManche = this.rules(manche, card, joueur, value)
 
 		this.setState({
-			deck:	newDeck,
-			pyramide: newPyramide,
-			tourPyramide: position,
+			deck: deck,
+			joueurs: joueurs,
+			isManche: isManche,
 		});
+
+		this.endTurn(isManche, manche, joueurEnCours);		
+	}
+
+	/**
+		Action jouée lorsqu'on arrive sur la dernière phase du jeu
+		On retourne une des cartes de la pyramide et on actionne les effets associés
+	*/
+	handleClickPyramide(){
+
+		//On récupère le tour en cours et la card jouée
+		let tour = this.state.tourPyramide;
+		let card = this.state.deck.shift();
+		this.state.pyramide[tour] = card
+
+		//Si un joueur possède la carte jouée, alors on la met en avant
+		this.activeBackground(card.value);
+
+		//Le compteur de gorgée qui augmente de 1 tous les deux tours
+		this.state.compteurVerre += ((tour + 1) % 2 == 0 ? 1 : 0);
+
+		//Le tour est terminée, on pass au tour suivant
+		tour++;
+		this.setState({tourPyramide: tour});
+
+		//Si on atteint le dernier tour, alors on arrive sur l'écrand de fin de la partie
+		if(MAX_TOUR_PYRAMIDE === tour){
+			this.state.isEnd = true;
+		}
 		
 	}
 
+	/********************************************
+	 *     Fonctions de chargement des vues     *
+	 ********************************************/
+
+	
+	/**
+		Affichage du tableau d'historique
+	**/
+	loadHistory(){
+		let history = []
+		this.state.history.forEach((msg) => {
+			history.push(<tr><td>{msg}</td></tr>);
+		});
+		return history;
+	}
+
+	/**
+		Affichage du panel gauche
+		Le tableau présentant les joueurs avec leurs cartes associées
+	**/
+	tableRender(){
+		let rows = [];
+		let i = 0;
+		this.state.joueurs.forEach((joueur) => {
+			rows.push(
+				<tr key={joueur.name} className={joueur.background}>
+					<td className="player-name">{joueur.name}</td>
+					{joueur.main.map((card) => <Card card={card}/>)}
+				</tr>
+			)
+		});
+		return rows;
+	}
+
+
+	/**
+		Afficahge du panel droit
+		Toutes les intéractions utilisateurs y sont présentes
+	**/
 	loadContentView(){
 		let content = [];
 
@@ -324,26 +360,23 @@ class Pyramide extends React.Component{
 			}else{
 				let labels = LABELS[this.state.manche];
 				for(let l in labels){
-					content.push(<Button onClick={() => this.handleClick(l)} className="button-choice">{labels[l]}</Button>);
+					content.push(<Button onClick={() => this.handleClick(l, this.state.manche, this.state.joueurEnCours)} className="button-choice">{labels[l]}</Button>);
 				}
 			}
 		}else{
 			for(let i in this.state.joueurs){
 				let joueur = this.state.joueurs[i];
-				content.push(<Button onClick={() => this.handleClickChoixJoueur(i)} className="button-choice" variant="danger">{joueur.name}</Button>);
+				content.push(<div>
+					<Button onClick={() => this.handleClickChoixJoueur(i, this.state.joueurs, this.state.manche, this.state.joueurEnCours)} className="button-choice" variant="danger">{joueur.name}</Button>
+				</div>);
 			}	
 		}
 		return content;
 	}
 
-	loadHistory(){
-		let history = []
-		for(let h in this.state.history){
-			history.push(<tr><td>{this.state.history[h]}</td></tr>);
-		}
-		return history;
-	}
-
+	/**
+		Render
+	**/
 	render(){
 		return(
 			<div className="flex-row">
